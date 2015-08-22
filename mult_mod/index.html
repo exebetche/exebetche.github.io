@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+<title>A title</title>
+<style type="text/css">
+html, body {
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+#container {
+	border: 1px solid black;
+	position: fixed;
+}
+
+#container, #container button {
+	font-size: 20px;
+	font-family: Helvetica,arial,freesans,clean,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";
+}
+
+#container input, #container button{
+	float: right;
+}
+
+#container{
+	padding: 10px;
+}
+
+#container > div{
+	margin: 20px;
+}
+
+#container > div > label, 
+#container > div > button{
+	padding: 5px;
+}
+
+#graph {
+	border: 1px solid black;
+	margin: auto;
+	display: block;
+}
+
+canvas{
+    image-rendering: optimizeSpeed;             /* STOP SMOOTHING, GIVE ME SPEED  */
+    image-rendering: -moz-crisp-edges;          /* Firefox                        */
+    image-rendering: -o-crisp-edges;            /* Opera                          */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and eventually Safari) */
+    image-rendering: pixelated; /* Chrome */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed                  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
+}
+</style>
+</head>
+<body>
+<div id="container">
+	<div><input id="table_start" value="0"/><label for="table_start">Table start</label></div>
+	<div><input id="table_end" value="855"/><label for="table_end">Table end</label></div>
+	<div><input id="table_step" value="0.01"/><label for="table_step">Table step</label></div>
+	<div><input id="mod" value="855"/><label for="mod">Mod</label></div>
+	<div><input id="margin" value="10"/><label for="margin">Margin (px)</label></div>
+	<div><input id="delay" value="10"/><label for="delay">Delay (ms)</label></div>
+	<div><button id="update" style="display: none;">Update</button><button id="animate">Animate</button></div>
+</div>
+<canvas id="graph"></canvas>
+<script type="text/javascript">
+	sin = Math.sin;
+	cos = Math.cos;
+	PI = Math.PI;
+	TAU = PI/2;
+	
+	var mult_mod_ani = function(ctx){
+		this.table_start = 0;
+		this.table_end = 855;
+		this.table_step = 0.01;
+		this.mod = 855; 
+		this.margin = 10; 
+		this.delay = 10;
+		this.stopped = true;
+		this.ctx = ctx;
+		this.ctx.font="20px Georgia";
+		this.step=PI/(this.mod/2);
+		this.radius = (this.ctx.canvas.width/2)-this.margin,
+		this.decal_x=this.decal_y=this.radius+this.margin;
+		this.table=this.table_start;
+		this.mod_step = PI/(this.mod/2);
+	}
+	
+	mult_mod_ani.prototype.init = function(){
+			this.step=PI/(this.mod/2);
+			this.radius = (this.ctx.canvas.width/2)-this.margin,
+			this.decal_x=this.decal_y=this.radius+this.margin;
+			//~ this.table=this.table_start;
+			this.mod_step = PI/(this.mod/2);
+	}
+	
+	mult_mod_ani.prototype.draw = function(){
+		var a, a2, i, x, y, x2, y2;
+		ctx.fillText("Table: "+(Math.floor(this.table*100)/100)+", modulo: "+this.mod,10,30);
+			
+		for(a=-PI/2, i=0; a<PI*2; a+=this.mod_step, i+=this.table){
+			x = cos(a)*this.radius+this.decal_x;
+			y = sin(a)*this.radius+this.decal_y;
+			
+			a2 = (i%this.mod)*this.mod_step-TAU;
+			
+			x2 = cos(a2)*this.radius+this.decal_x;
+			y2 = sin(a2)*this.radius+this.decal_y;
+			
+			this.ctx.beginPath();
+			this.ctx.moveTo(x,y);
+			this.ctx.lineTo(x2, y2);
+			this.ctx.stroke();
+		}
+	}
+	
+	mult_mod_ani.prototype.clear = function(){
+		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+	}
+	
+	mult_mod_ani.prototype.animate = function(){
+		this.clear();
+		this.draw();
+		this.table+=this.table_step;
+		if(this.table<=this.table_end&&!this.stopped){
+			var _this = this;
+			setTimeout(function(){
+				_this.animate();
+			}, this.delay)
+		}
+		else if(this.table!=this.table_end&&!this.stopped){
+			var _this = this;
+			this.table=this.table_end;
+			setTimeout(function(){
+				_this.animate();
+			}, this.delay)
+		}
+	}
+	
+	window.onload = function(){
+		height = window.innerHeight;
+		width = window.innerWidth;
+		canvas = document.getElementById("graph");
+		ctx = canvas.getContext("2d");
+			
+		canvas.height = canvas.width = height = width = Math.min(height, width)-2;
+		
+		var animator = new mult_mod_ani(ctx);
+		
+		var table_start = document.getElementById("table_start"),
+			table_end = document.getElementById("table_end"),
+			table_step = document.getElementById("table_step"),
+			mod = document.getElementById("mod"),
+			margin = document.getElementById("margin"),
+			delay = document.getElementById("delay"),
+			delay = document.getElementById("delay"),
+			update = document.getElementById("update"),
+			animate = document.getElementById("animate");
+			
+		function change_value(){
+			animator.table_start = parseFloat(table_start.value);
+			animator.table_end = parseFloat(table_end.value);
+			animator.table_step = parseFloat(table_step.value);
+			animator.mod = parseInt(mod.value);
+			animator.margin = parseInt(margin.value);
+			animator.delay = parseInt(delay.value);
+			animator.init();
+		}		
+		
+		update.onclick = change_value;
+		
+		
+		animate.onclick = function(){
+			if(animator.stopped){
+				animator.stopped = false;
+				animate.innerHTML = "Stop";
+				update.style.display = "inline";
+				change_value();
+				animator.init();
+				animator.animate();
+			}
+			else{
+				animator.stopped = true;
+				animate.innerHTML = "Animate";
+				update.style.display = "none";
+			}
+		}
+	}
+</script>
+</body>
+</html>
