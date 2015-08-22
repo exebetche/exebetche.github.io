@@ -100,7 +100,7 @@ canvas{
 		var a, a2, i, x, y, x2, y2;
 		ctx.fillText("Table: "+(Math.floor(this.table*100)/100)+", modulo: "+this.mod,10,30);
 			
-		for(a=-PI/2, i=0; a<PI*2; a+=this.mod_step, i+=this.table){
+		for(a=-PI/2, i=0; a<PI*1.5; a+=this.mod_step, i+=this.table){
 			x = cos(a)*this.radius+this.decal_x;
 			y = sin(a)*this.radius+this.decal_y;
 			
