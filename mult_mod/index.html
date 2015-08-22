@@ -161,6 +161,7 @@ canvas{
 			
 		function change_value(){
 			animator.table_start = parseFloat(table_start.value);
+			animator.table = animator.table_start;
 			animator.table_end = parseFloat(table_end.value);
 			animator.table_step = parseFloat(table_step.value);
 			animator.mod = parseInt(mod.value);
@@ -185,7 +186,6 @@ canvas{
 				animator.stopped = true;
 				animate.innerHTML = "Animate";
 				update.style.display = "none";
-				animator.table = parseFloat(table_start.value);
 			}
 		}
 	}
