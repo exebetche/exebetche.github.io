@@ -56,9 +56,9 @@ canvas{
 </head>
 <body>
 <div id="container">
-	<div><input id="table_start" value="300"/><label for="table_start">Table start</label></div>
+	<div><input id="table_start" value="0"/><label for="table_start">Table start</label></div>
 	<div><input id="table_end" value="855"/><label for="table_end">Table end</label></div>
-	<div><input id="table_step" value="0.005"/><label for="table_step">Table step</label></div>
+	<div><input id="table_step" value="0.01"/><label for="table_step">Table step</label></div>
 	<div><input id="mod" value="855"/><label for="mod">Mod</label></div>
 	<div><input id="margin" value="10"/><label for="margin">Margin (px)</label></div>
 	<div><input id="delay" value="10"/><label for="delay">Delay (ms)</label></div>
@@ -72,9 +72,9 @@ canvas{
 	TAU = PI/2;
 	
 	var mult_mod_ani = function(ctx){
-		this.table_start = 300;
+		this.table_start = 0;
 		this.table_end = 855;
-		this.table_step = 0.005;
+		this.table_step = 0.01;
 		this.mod = 855; 
 		this.margin = 10; 
 		this.delay = 10;
@@ -161,7 +161,6 @@ canvas{
 			
 		function change_value(){
 			animator.table_start = parseFloat(table_start.value);
-			animator.table = animator.table_start;
 			animator.table_end = parseFloat(table_end.value);
 			animator.table_step = parseFloat(table_step.value);
 			animator.mod = parseInt(mod.value);
@@ -170,22 +169,34 @@ canvas{
 			animator.init();
 		}		
 		
-		update.onclick = change_value;
-		
+		update.onclick = function(){
+			if(animator.stopped){
+				animator.stopped = false;
+				animate.innerHTML = "Stop";
+				update.innerHTML = "Update";
+				change_value();
+				animator.animate();
+			}
+			else{
+				change_value();
+			}
+			
+		}
 		
 		animate.onclick = function(){
 			if(animator.stopped){
 				animator.stopped = false;
 				animate.innerHTML = "Stop";
 				update.style.display = "inline";
+				update.innerHTML = "Update";
 				change_value();
-				animator.init();
+				animator.table = animator.table_start;
 				animator.animate();
 			}
 			else{
 				animator.stopped = true;
-				animate.innerHTML = "Animate";
-				update.style.display = "none";
+				animate.innerHTML = "Restart";
+				update.innerHTML = "Continue";
 			}
 		}
 	}
